@@ -1,0 +1,31 @@
+<!doctype html>
+<!--
+  Starlink Tracker - By TristEdw
+  Made by Tristan Edwards (TristEdw) - https://github.com/tristedw
+  Source: https://github.com/tristedw/starlink-tracker
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Starlink Tracker - By TristEdw</title>
+    <meta name="description" content="Live 3D tracker for Starlink satellites. Find the nearest one, see what is overhead, and work out the next pass. Made by Tristan Edwards (TristEdw)." />
+    <meta name="author" content="Tristan Edwards (TristEdw)" />
+    <link rel="author" href="https://github.com/tristedw" />
+    <meta name="theme-color" content="#05070d" />
+    <!--
+      GitHub Pages can't set response headers, so the policy goes here instead.
+      Everything is same-origin apart from the CARTO basemap; blob: is for the
+      MapLibre tile workers.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'none'; script-src 'self'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://basemaps.cartocdn.com https://*.basemaps.cartocdn.com; font-src 'self' data:; connect-src 'self' https://basemaps.cartocdn.com https://*.basemaps.cartocdn.com"
+    />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛰️</text></svg>" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,65 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  # Celestrak republishes about every 2 hours. Rebuilding on the same cadence
+  # keeps the deployed element set fresh without any server running.
+  schedule:
+    - cron: '20 */2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# A queued run should wait for the one in flight rather than cancel it, so a
+# scheduled data refresh never kills a deploy that is halfway through.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run typecheck
+
+      - run: npm test
+
+      - name: Build
+        run: |
+          REPO=${GITHUB_REPOSITORY#*/}
+          # Project sites live at /<repo>/, so Vite needs the subpath. If
+          # Celestrak is down or rate limiting us, the fetch script reuses the
+          # element set the last successful deploy published rather than
+          # failing the build.
+          export BASE_PATH="/$REPO/"
+          export FALLBACK_DATA_URL="https://${GITHUB_REPOSITORY_OWNER}.github.io/$REPO/data"
+          npm run build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

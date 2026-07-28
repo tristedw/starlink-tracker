@@ -1,0 +1,11 @@
+node_modules
+dist
+*.local
+.env
+.env.*
+.DS_Store
+*.tsbuildinfo
+vite.config.ts.timestamp-*.mjs
+
+# Element sets are pulled at build time, never committed.
+public/data
