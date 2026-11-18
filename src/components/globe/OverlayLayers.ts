@@ -20,7 +20,7 @@ export class OrbitPathLayer {
 
   constructor() {
     const geo = new THREE.SphereGeometry(1.4, 12, 12);
-    const mat = new THREE.MeshBasicMaterial({ color: '#ff6b5c' });
+    const mat = new THREE.MeshBasicMaterial({ color: '#ff5d73' });
     this.marker = new THREE.Mesh(geo, mat);
     this.marker.visible = false;
     this.object.add(this.marker);
@@ -48,7 +48,7 @@ export class OrbitPathLayer {
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(verts, 3));
     const material = new THREE.LineBasicMaterial({
-      color: '#ff8f7a',
+      color: '#ff8a9a',
       transparent: true,
       opacity: 0.75,
       depthWrite: false,
@@ -103,7 +103,7 @@ export class FootprintLayer {
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(verts, 3));
     const material = new THREE.LineBasicMaterial({
-      color: '#ffd23f',
+      color: '#7fd1c1',
       transparent: true,
       opacity: 0.6,
       depthWrite: false,
@@ -135,12 +135,12 @@ export class ObserverMarker {
     this.object = new THREE.Group();
     this.pin = new THREE.Mesh(
       new THREE.SphereGeometry(1.1, 16, 16),
-      new THREE.MeshBasicMaterial({ color: '#39ff6a' })
+      new THREE.MeshBasicMaterial({ color: '#e8eef8' })
     );
     this.ring = new THREE.Mesh(
       new THREE.RingGeometry(1.8, 2.6, 32),
       new THREE.MeshBasicMaterial({
-        color: '#39ff6a',
+        color: '#e8eef8',
         transparent: true,
         opacity: 0.45,
         side: THREE.DoubleSide,

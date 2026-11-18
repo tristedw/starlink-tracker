@@ -67,7 +67,7 @@ export default function TimeControls() {
         engine.clock.step(e.shiftKey ? -3_600_000 : -300_000);
       } else if (e.key === 'ArrowRight') {
         engine.clock.step(e.shiftKey ? 3_600_000 : 300_000);
-      } else if (e.key.toLowerCase() === 'l') {
+      } else if (e.key.toLowerCase() === 'l' && !e.metaKey && !e.ctrlKey) {
         engine.clock.goLive();
       }
     };
@@ -84,11 +84,20 @@ export default function TimeControls() {
           aria-label={clock.playing ? 'Pause' : 'Play'}
           title={clock.playing ? 'Pause (space)' : 'Play (space)'}
         >
-          {clock.playing ? '❚❚' : '▶'}
+          {clock.playing ? (
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden>
+              <rect x="3" y="2" width="3.5" height="12" rx="1" fill="currentColor" />
+              <rect x="9.5" y="2" width="3.5" height="12" rx="1" fill="currentColor" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden>
+              <path d="M4 2.5v11a.8.8 0 0 0 1.2.7l9-5.5a.8.8 0 0 0 0-1.4l-9-5.5A.8.8 0 0 0 4 2.5z" fill="currentColor" />
+            </svg>
+          )}
         </button>
 
         <div className="time-readout">
-          <span className="mono time-value">{formatDateTime(clock.timeMs)}</span>
+          <span className="time-value">{formatDateTime(clock.timeMs)}</span>
           <span className={clock.live ? 'badge badge-live' : 'badge'}>{offsetLabel}</span>
         </div>
 
@@ -111,7 +120,7 @@ export default function TimeControls() {
           disabled={clock.live}
           title="Return to real time (L)"
         >
-          Live
+          Back to now
         </button>
       </div>
 

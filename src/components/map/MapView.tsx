@@ -85,7 +85,7 @@ export default function MapView({
         type: 'line',
         source: TRACK_SRC,
         paint: {
-          'line-color': '#ff8f7a',
+          'line-color': '#ff8a9a',
           'line-width': 1.8,
           'line-opacity': 0.85,
         },
@@ -96,13 +96,13 @@ export default function MapView({
         id: `${FOOTPRINT_SRC}-fill`,
         type: 'fill',
         source: FOOTPRINT_SRC,
-        paint: { 'fill-color': '#ffd23f', 'fill-opacity': 0.08 },
+        paint: { 'fill-color': '#7fd1c1', 'fill-opacity': 0.08 },
       });
       map.addLayer({
         id: `${FOOTPRINT_SRC}-line`,
         type: 'line',
         source: FOOTPRINT_SRC,
-        paint: { 'line-color': '#ffd23f', 'line-width': 1.2, 'line-opacity': 0.6 },
+        paint: { 'line-color': '#7fd1c1', 'line-width': 1.2, 'line-opacity': 0.6 },
       });
 
       map.addSource(OBSERVER_SRC, { type: 'geojson', data: EMPTY });
@@ -112,7 +112,7 @@ export default function MapView({
         source: OBSERVER_SRC,
         paint: {
           'circle-radius': 14,
-          'circle-color': '#39ff6a',
+          'circle-color': '#e8eef8',
           'circle-opacity': 0.15,
         },
       });
@@ -122,8 +122,8 @@ export default function MapView({
         source: OBSERVER_SRC,
         paint: {
           'circle-radius': 5,
-          'circle-color': '#39ff6a',
-          'circle-stroke-color': '#04160a',
+          'circle-color': '#e8eef8',
+          'circle-stroke-color': '#0d1424',
           'circle-stroke-width': 2,
         },
       });

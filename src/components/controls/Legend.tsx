@@ -4,11 +4,11 @@
  * Source: https://github.com/tristedw/starlink-tracker
  */
 const ITEMS = [
-  { colour: '#5ad1ff', label: 'Sunlit' },
-  { colour: '#3f9fc4', label: 'Penumbra' },
-  { colour: '#2c4b63', label: "Earth's shadow" },
-  { colour: '#ffd23f', label: 'Near you' },
-  { colour: '#ff6b5c', label: 'Selected' },
+  { colour: '#f3c06b', label: 'In sunlight' },
+  { colour: '#a8794f', label: 'Penumbra' },
+  { colour: '#4a5d80', label: "In Earth's shadow" },
+  { colour: '#7fd1c1', label: 'Near you' },
+  { colour: '#ff5d73', label: 'Selected' },
 ];
 
 export default function Legend() {

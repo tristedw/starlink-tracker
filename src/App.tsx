@@ -19,6 +19,7 @@ import SearchPanel from './components/panels/SearchPanel';
 import DetailPanel from './components/panels/DetailPanel';
 import NearestPanel from './components/panels/NearestPanel';
 import PassesPanel from './components/panels/PassesPanel';
+import NextPassCard from './components/panels/NextPassCard';
 
 // Three.js and MapLibre are the two heavy dependencies. Split them so you only
 // download the renderer you're actually looking at.
@@ -36,6 +37,13 @@ const DEFAULT_SETTINGS: ViewSettings = {
 
 const SETTINGS_KEY = 'starlink-tracker:settings';
 
+type Tab = 'sky' | 'search' | 'display';
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'sky', label: 'Your sky' },
+  { id: 'search', label: 'Search' },
+  { id: 'display', label: 'Display' },
+];
+
 export default function App() {
   // One engine for the life of the app. It owns the worker pool, so it
   // lives in a ref rather than state, so StrictMode's double-invoked effects
@@ -47,6 +55,8 @@ export default function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('globe');
   const [panelOpen, setPanelOpen] = useState(true);
   const [settings, setSettings] = useState<ViewSettings>(loadSettings);
+  const [tab, setTab] = useState<Tab>('sky');
+  const [helpOpen, setHelpOpen] = useState(false);
   const geo = useGeolocation();
   const isMobile = useIsMobile();
 
@@ -96,12 +106,45 @@ export default function App() {
     onPickLocation: handlePickLocation,
   };
 
+  // Global shortcuts. Time keys live in TimeControls.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target as HTMLElement | null;
+      const typing = target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName);
+      if (e.key === 'Escape') {
+        if (typing) (target as HTMLElement).blur();
+        else if (helpOpen) setHelpOpen(false);
+        else engine.select(null);
+        return;
+      }
+      if (typing) return;
+      const k = e.key.toLowerCase();
+      if (k === 'g') setViewMode('globe');
+      else if (k === 'm') setViewMode('map');
+      else if (k === 'p') setPanelOpen((o) => !o);
+      else if (k === '?') setHelpOpen((o) => !o);
+      else if (e.key === '/') {
+        e.preventDefault();
+        setPanelOpen(true);
+        setTab('search');
+        requestAnimationFrame(() => document.getElementById('sat-search')?.focus());
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [engine, helpOpen]);
+
   return (
     <EngineContext.Provider value={engine}>
       <div className={`app${isMobile ? ' is-mobile' : ''}`}>
         <header className="topbar">
           <div className="brand">
-            <span className="brand-mark" aria-hidden />
+            <svg className="brand-mark" viewBox="0 0 24 24" width="22" height="22" aria-hidden>
+              <circle cx="12" cy="12" r="4.2" fill="currentColor" opacity="0.9" />
+              <ellipse cx="12" cy="12" rx="10.5" ry="4" fill="none" stroke="currentColor" strokeWidth="1.2" transform="rotate(-28 12 12)" opacity="0.55" />
+              <circle cx="20.6" cy="7.6" r="1.7" className="brand-sat" />
+            </svg>
             <span className="brand-name">Starlink Tracker</span>
             <a
               className="brand-by"
@@ -110,32 +153,53 @@ export default function App() {
               rel="noopener noreferrer"
               title="Made by Tristan Edwards - github.com/tristedw"
             >
-              By TristEdw
+              by TristEdw
             </a>
           </div>
 
-          <div className="segmented view-toggle" role="group" aria-label="View mode">
+          <div className="topbar-actions">
+            <div className="segmented view-toggle" role="group" aria-label="View mode">
+              <button
+                className={viewMode === 'globe' ? 'active' : ''}
+                aria-pressed={viewMode === 'globe'}
+                onClick={() => setViewMode('globe')}
+                title="Globe (G)"
+              >
+                Globe
+              </button>
+              <button
+                className={viewMode === 'map' ? 'active' : ''}
+                aria-pressed={viewMode === 'map'}
+                onClick={() => setViewMode('map')}
+                title="Flat map (M)"
+              >
+                Map
+              </button>
+            </div>
+
             <button
-              className={viewMode === 'globe' ? 'active' : ''}
-              onClick={() => setViewMode('globe')}
+              className="btn-icon topbar-icon"
+              onClick={() => setHelpOpen((o) => !o)}
+              aria-expanded={helpOpen}
+              aria-label="Keyboard shortcuts"
+              title="Keyboard shortcuts (?)"
             >
-              Globe
+              ?
             </button>
+
             <button
-              className={viewMode === 'map' ? 'active' : ''}
-              onClick={() => setViewMode('map')}
+              className="btn-icon topbar-icon"
+              onClick={() => setPanelOpen((o) => !o)}
+              aria-expanded={panelOpen}
+              aria-label={panelOpen ? 'Hide side panel' : 'Show side panel'}
+              title={panelOpen ? 'Hide panel (P)' : 'Show panel (P)'}
             >
-              Map
+              <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden>
+                <rect x="2.5" y="3.5" width="15" height="13" rx="2" fill="none" stroke="currentColor" strokeWidth="1.4" />
+                <rect x="12" y="3.5" width="5.5" height="13" rx="1" fill="currentColor" opacity={panelOpen ? 0.85 : 0.2} />
+              </svg>
             </button>
           </div>
-
-          <button
-            className="btn btn-small panel-toggle"
-            onClick={() => setPanelOpen((o) => !o)}
-            aria-expanded={panelOpen}
-          >
-            {panelOpen ? 'Hide panel' : 'Show panel'}
-          </button>
         </header>
 
         <main className="main">
@@ -145,7 +209,7 @@ export default function App() {
                 fallback={
                   <div className="canvas-loading">
                     <span className="spinner" aria-hidden />
-                    Loading {viewMode === 'globe' ? 'globe' : 'map'}…
+                    Loading the {viewMode === 'globe' ? 'globe' : 'map'}…
                   </div>
                 }
               >
@@ -157,18 +221,63 @@ export default function App() {
             <div className="time-dock">
               <TimeControls />
             </div>
+
+            {helpOpen && (
+              <div className="help" role="dialog" aria-label="Keyboard shortcuts">
+                <div className="help-head">
+                  <h2>Shortcuts</h2>
+                  <button className="btn-icon btn-close" onClick={() => setHelpOpen(false)} aria-label="Close">
+                    ×
+                  </button>
+                </div>
+                <dl className="help-keys">
+                  <dt><kbd>Space</kbd></dt><dd>Pause or play time</dd>
+                  <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Step 5 minutes (hold Shift for an hour)</dd>
+                  <dt><kbd>L</kbd></dt><dd>Back to real time</dd>
+                  <dt><kbd>G</kbd> <kbd>M</kbd></dt><dd>Globe or flat map</dd>
+                  <dt><kbd>/</kbd></dt><dd>Search for a satellite</dd>
+                  <dt><kbd>P</kbd></dt><dd>Show or hide the panel</dd>
+                  <dt><kbd>Esc</kbd></dt><dd>Clear the selection</dd>
+                </dl>
+              </div>
+            )}
           </div>
 
           <aside className={`panel ${panelOpen ? 'open' : 'closed'}`} aria-hidden={!panelOpen}>
             <div className="panel-scroll">
               <StatusPanel />
-              <LocationPanel geo={geo} />
+              <NextPassCard />
               <DetailPanel />
-              <NearestPanel />
-              <PassesPanel />
-              <SearchPanel />
-              <SettingsPanel settings={settings} onChange={updateSettings} />
-              <footer className="panel-footer muted small">
+
+              <div className="tabs" role="tablist" aria-label="Panel sections">
+                {TABS.map((t) => (
+                  <button
+                    key={t.id}
+                    role="tab"
+                    aria-selected={tab === t.id}
+                    className={tab === t.id ? 'tab active' : 'tab'}
+                    onClick={() => setTab(t.id)}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+
+              <div role="tabpanel">
+                {tab === 'sky' && (
+                  <>
+                    <LocationPanel geo={geo} />
+                    <NearestPanel />
+                    <PassesPanel />
+                  </>
+                )}
+                {tab === 'search' && <SearchPanel />}
+                {tab === 'display' && (
+                  <SettingsPanel settings={settings} onChange={updateSettings} />
+                )}
+              </div>
+
+              <footer className="panel-footer">
                 Orbital elements from{' '}
                 <a href="https://celestrak.org" target="_blank" rel="noreferrer">
                   Celestrak

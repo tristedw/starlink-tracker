@@ -26,33 +26,35 @@ export default function SearchPanel() {
 
   return (
     <section className="panel-section">
-      <h2>Search</h2>
+      <h2>Find a satellite</h2>
       <input
+        id="sat-search"
         className="search-input"
         type="search"
         inputMode="search"
-        placeholder="Name or NORAD ID…"
+        placeholder="STARLINK-1130 or 44713"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         aria-label="Search satellites by name or NORAD ID"
       />
       {deferred.trim() !== '' && results.length === 0 && (
-        <p className="hint">No matches.</p>
+        <p className="hint">Nothing matches "{deferred.trim()}". Try part of the name or the 5 digit NORAD number.</p>
+      )}
+      {deferred.trim() === '' && (
+        <p className="hint">Type a name or NORAD number. Tip: press / anywhere to jump here.</p>
       )}
       {results.length > 0 && (
         <ul className="list">
           {results.map((info) => (
             <li key={info.noradId}>
               <button
-                className={
-                  info.noradId === snapshot.selectedId ? 'list-item selected' : 'list-item'
-                }
+                className={info.noradId === snapshot.selectedId ? 'row row-4 selected' : 'row row-4'}
                 onClick={() => engine.select(info.noradId)}
               >
-                <span className="list-item-title">{info.name}</span>
-                <span className="muted small">
-                  #{info.noradId} · {info.inclinationDeg.toFixed(1)}° incl
-                </span>
+                <span className="row-dot" aria-hidden />
+                <span className="row-name">{info.name}</span>
+                <span className="row-num row-dim">{info.noradId}</span>
+                <span className="row-num row-dim">{info.inclinationDeg.toFixed(1)}°</span>
               </button>
             </li>
           ))}

@@ -15,7 +15,7 @@ export default function LocationPanel({ geo }: Props) {
 
   return (
     <section className="panel-section">
-      <h2>Your location</h2>
+      <h2>Your spot</h2>
 
       {!location && (
         <>
@@ -27,8 +27,7 @@ export default function LocationPanel({ geo }: Props) {
             {status === 'requesting' ? 'Requesting…' : 'Use my location'}
           </button>
           <p className="hint">
-            Or click anywhere on the {''}
-            globe or map to drop a pin instead, no permission needed.
+            Or click anywhere on the globe or map to drop a pin. No permission needed.
           </p>
         </>
       )}
@@ -36,7 +35,7 @@ export default function LocationPanel({ geo }: Props) {
       {location && (
         <>
           <div className="location-info">
-            <span className="mono">{formatCoords(location.lat, location.lng)}</span>
+            <span className="coords">{formatCoords(location.lat, location.lng)}</span>
             {location.accuracyM !== undefined && status === 'granted' && (
               <span className="muted small">±{Math.round(location.accuracyM)} m</span>
             )}

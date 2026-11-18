@@ -38,11 +38,11 @@ export const DEFAULT_STYLE: PointCloudStyle = {
   sunlitOnly: false,
 };
 
-const COLOR_SUNLIT = new THREE.Color('#5ad1ff');
-const COLOR_PENUMBRA = new THREE.Color('#3f9fc4');
-const COLOR_UMBRA = new THREE.Color('#2c4b63');
-const COLOR_NEAREST = new THREE.Color('#ffd23f');
-const COLOR_SELECTED = new THREE.Color('#ff6b5c');
+const COLOR_SUNLIT = new THREE.Color('#f3c06b');
+const COLOR_PENUMBRA = new THREE.Color('#a8794f');
+const COLOR_UMBRA = new THREE.Color('#4a5d80');
+const COLOR_NEAREST = new THREE.Color('#7fd1c1');
+const COLOR_SELECTED = new THREE.Color('#ff5d73');
 
 const VERTEX_SHADER = /* glsl */ `
   attribute float size;

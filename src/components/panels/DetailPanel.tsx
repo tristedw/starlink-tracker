@@ -25,11 +25,14 @@ export default function DetailPanel() {
   return (
     <section className="panel-section detail-panel">
       <div className="detail-head">
-        <h2>{d.name}</h2>
+        <div>
+          <h2>{d.name}</h2>
+          <span className="detail-sub">NORAD {d.noradId}</span>
+        </div>
         <button
-          className="btn-icon"
+          className="btn-icon btn-close"
           onClick={() => engine.select(null)}
-          aria-label="Clear selection"
+          aria-label="Clear selection" title="Clear selection (Esc)"
         >
           ×
         </button>
@@ -38,11 +41,8 @@ export default function DetailPanel() {
       <IlluminationBadge state={d.illumination} />
 
       <dl className="detail-grid">
-        <dt>NORAD ID</dt>
-        <dd className="mono">{d.noradId}</dd>
-
         <dt>Position</dt>
-        <dd className="mono">{formatCoords(d.lat, d.lng)}</dd>
+        <dd>{formatCoords(d.lat, d.lng)}</dd>
 
         <dt>Altitude</dt>
         <dd>{formatKm(d.altKm, 1)}</dd>

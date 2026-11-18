@@ -263,7 +263,7 @@ export default function GlobeView({
         bumpImageUrl={GLOBE_TEXTURES.bump}
         backgroundImageUrl={GLOBE_TEXTURES.sky}
         showAtmosphere
-        atmosphereColor="#4aa8ff"
+        atmosphereColor="#7d9ad8"
         atmosphereAltitude={0.16}
         animateIn={false}
       />

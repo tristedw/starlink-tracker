@@ -27,10 +27,8 @@ export default function SettingsPanel({ settings, onChange }: Props) {
       <h2>Display</h2>
 
       <label className="field">
-        <span className="muted small">
-          Density
-          <span className="muted">: reduce if the view stutters on your device</span>
-        </span>
+        <span className="field-label">Density</span>
+        <span className="checkbox-hint">Drop this if the view stutters on your device.</span>
         <div className="segmented">
           {DENSITY.map((d) => (
             <button
@@ -45,7 +43,7 @@ export default function SettingsPanel({ settings, onChange }: Props) {
       </label>
 
       <label className="field">
-        <span className="muted small">Satellite size</span>
+        <span className="field-label">Dot size</span>
         <input
           type="range"
           min={0.5}
@@ -73,7 +71,7 @@ export default function SettingsPanel({ settings, onChange }: Props) {
         />
         <span>
           Show only sunlit satellites
-          <span className="muted small">: the ones that could be seen</span>
+          <span className="checkbox-hint">The ones you could actually see</span>
         </span>
       </label>
 

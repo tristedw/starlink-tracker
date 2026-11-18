@@ -5,13 +5,14 @@
  */
 import { useCallback, useState } from 'react';
 import {
-  formatAzimuth,
+  compassPoint,
   formatClockTime,
   formatCountdown,
   formatDeg,
   formatDuration,
 } from '../../lib/format';
 import { useEngine, useEngineSnapshot } from '../../hooks/useEngine';
+import { useClockState } from '../../hooks/useClock';
 
 const WINDOWS = [
   { label: '1h', minutes: 60 },
@@ -31,6 +32,7 @@ const MIN_ELEVATIONS = [0, 10, 25, 40];
 export default function PassesPanel() {
   const engine = useEngine();
   const s = useEngineSnapshot();
+  const clock = useClockState(1000);
   const [windowMinutes, setWindowMinutes] = useState(180);
 
   const run = useCallback(() => {
@@ -41,18 +43,25 @@ export default function PassesPanel() {
     return (
       <section className="panel-section">
         <h2>Upcoming passes</h2>
-        <p className="hint">Set a location to predict when satellites will fly over you.</p>
+        <p className="hint">Set a location first and the pass list fills in here.</p>
       </section>
     );
   }
 
   return (
     <section className="panel-section">
-      <h2>Upcoming passes</h2>
+      <div className="section-head">
+        <h2>Upcoming passes</h2>
+        {s.passes.length > 0 && (
+          <span className="section-meta">
+            {s.passes.length} in the next {formatDuration(windowMinutes * 60_000)}
+          </span>
+        )}
+      </div>
 
       <div className="filter-grid">
         <label>
-          <span className="muted small">Window</span>
+          <span className="field-label">Look ahead</span>
           <div className="segmented">
             {WINDOWS.map((w) => (
               <button
@@ -67,7 +76,7 @@ export default function PassesPanel() {
         </label>
 
         <label>
-          <span className="muted small">Min elevation</span>
+          <span className="field-label">Min. height</span>
           <div className="segmented">
             {MIN_ELEVATIONS.map((e) => (
               <button
@@ -90,12 +99,12 @@ export default function PassesPanel() {
         />
         <span>
           Naked-eye visible only
-          <span className="muted small">: sunlit satellite, dark sky where you are</span>
+          <span className="checkbox-hint">Sunlit satellite and a dark sky where you are</span>
         </span>
       </label>
 
       <button className="btn btn-primary" onClick={run} disabled={s.passesStatus === 'loading'}>
-        {s.passesStatus === 'loading' ? 'Searching the constellation…' : 'Find passes'}
+        {s.passesStatus === 'loading' ? 'Searching…' : s.passes.length > 0 ? 'Search again' : 'Find passes'}
       </button>
 
       {s.passesStatus === 'ready' && s.passes.length === 0 && (
@@ -107,37 +116,33 @@ export default function PassesPanel() {
       )}
 
       {s.passes.length > 0 && (
-        <>
-          <p className="muted small">
-            {s.passes.length} pass{s.passes.length === 1 ? '' : 'es'} · sorted by rise time
-          </p>
-          <ul className="list pass-list">
-            {s.passes.slice(0, 40).map((p) => (
-              <li key={`${p.noradId}-${p.riseTimeMs}`}>
-                <button
-                  className={p.noradId === s.selectedId ? 'list-item selected' : 'list-item'}
-                  onClick={() => engine.select(p.noradId)}
-                >
-                  <span className="list-item-title">
+        <ul className="list pass-list">
+          {s.passes.slice(0, 40).map((p) => (
+            <li key={`${p.noradId}-${p.riseTimeMs}`}>
+              <button
+                className={`pass${p.noradId === s.selectedId ? ' selected' : ''}${p.visible ? ' is-visible' : ''}`}
+                onClick={() => engine.select(p.noradId)}
+              >
+                <span className="pass-when">
+                  <span className="pass-in">{formatCountdown(p.riseTimeMs, clock.timeMs)}</span>
+                  <span className="pass-clock">{formatClockTime(p.riseTimeMs)}</span>
+                </span>
+                <span className="pass-what">
+                  <span className="pass-name">
                     {p.name}
-                    {p.visible && (
-                      <span className="tag tag-visible" title="Sunlit satellite, dark sky">
-                        visible
-                      </span>
-                    )}
+                    {p.visible && <span className="tag-visible">Visible</span>}
                   </span>
-                  <span className="pass-timing">
-                    in {formatCountdown(p.riseTimeMs)} · peak {formatDeg(p.peakElevationDeg, 0)}
+                  <span className="pass-path">
+                    {compassPoint(p.riseAzimuthDeg)} to {compassPoint(p.setAzimuthDeg)}, {formatDuration(p.durationMs)}
                   </span>
-                  <span className="muted small">
-                    {formatClockTime(p.riseTimeMs)} {formatAzimuth(p.riseAzimuthDeg)} →{' '}
-                    {formatAzimuth(p.setAzimuthDeg)} · {formatDuration(p.durationMs)}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </>
+                </span>
+                <span className="pass-peak" title="Peak height above the horizon">
+                  {formatDeg(p.peakElevationDeg, 0)}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
       )}
     </section>
   );

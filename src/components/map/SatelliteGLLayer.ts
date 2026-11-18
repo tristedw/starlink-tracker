@@ -50,11 +50,11 @@ const FRAGMENT_SRC = `
 `;
 
 const COLOURS = {
-  sunlit: [0.35, 0.82, 1.0],
-  penumbra: [0.25, 0.62, 0.77],
-  umbra: [0.17, 0.29, 0.39],
-  nearest: [1.0, 0.82, 0.25],
-  selected: [1.0, 0.42, 0.36],
+  sunlit: [0.953, 0.753, 0.42],
+  penumbra: [0.659, 0.475, 0.31],
+  umbra: [0.29, 0.365, 0.502],
+  nearest: [0.498, 0.82, 0.757],
+  selected: [1.0, 0.365, 0.451],
 } as const;
 
 export class SatelliteGLLayer implements CustomLayerInterface {

@@ -3,8 +3,9 @@
  * Made by Tristan Edwards (TristEdw) - https://github.com/tristedw
  * Source: https://github.com/tristedw/starlink-tracker
  */
-import { formatAzimuth, formatDeg, formatKm } from '../../lib/format';
+import { compassPoint, formatDeg, formatKm } from '../../lib/format';
 import { useEngine, useEngineSnapshot } from '../../hooks/useEngine';
+import SkyPlot from './SkyPlot';
 
 /**
  * What's closest right now, split by whether it's actually above your horizon.
@@ -20,63 +21,76 @@ export default function NearestPanel() {
 
   const overhead = nearest.filter((n) => n.elevationDeg > 0);
   const below = nearest.filter((n) => n.elevationDeg <= 0);
+  const litCount = overhead.filter((n) => n.illumination === 'sunlit').length;
 
   return (
     <section className="panel-section">
-      <h2>
-        Above you now
-        {overhead.length > 0 && <span className="count-pill">{overhead.length}</span>}
-      </h2>
+      <div className="section-head">
+        <h2>Above you now</h2>
+        {overhead.length > 0 && (
+          <span className="section-meta">
+            {overhead.length} up, {litCount} in sunlight
+          </span>
+        )}
+      </div>
 
       {nearest.length === 0 && <p className="hint">Waiting for the first position update…</p>}
 
       {nearest.length > 0 && overhead.length === 0 && (
         <p className="hint">
-          Nothing above your horizon this second. Starlink coverage moves fast, so check
-          upcoming passes below.
+          Nothing above your horizon this second. Coverage moves fast, so check the passes
+          list.
         </p>
       )}
 
       {overhead.length > 0 && (
-        <ul className="list">
-          {overhead.map((n) => (
-            <li key={n.noradId}>
-              <button
-                className={n.noradId === selectedId ? 'list-item selected' : 'list-item'}
-                onClick={() => engine.select(n.noradId)}
-              >
-                <span className="list-item-title">
-                  {n.name}
-                  {n.illumination === 'sunlit' && (
-                    <span className="tag tag-lit" title="Sunlit, potentially visible">
-                      lit
-                    </span>
-                  )}
-                </span>
-                <span className="muted small">
-                  {formatDeg(n.elevationDeg, 0)} up · {formatAzimuth(n.azimuthDeg)} ·{' '}
-                  {formatKm(n.rangeKm, 0)}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
+        <>
+          <div className="sky-wrap">
+            <SkyPlot
+              dots={overhead.map((n) => ({
+                id: n.noradId,
+                az: n.azimuthDeg,
+                el: n.elevationDeg,
+                lit: n.illumination === 'sunlit',
+                selected: n.noradId === selectedId,
+              }))}
+              onPick={(id) => engine.select(id)}
+            />
+          </div>
+          <ul className="list">
+            {overhead.map((n) => (
+              <li key={n.noradId}>
+                <button
+                  className={n.noradId === selectedId ? 'row selected' : 'row'}
+                  onClick={() => engine.select(n.noradId)}
+                >
+                  <span className={`row-dot${n.illumination === 'sunlit' ? ' lit' : ''}`} aria-hidden />
+                  <span className="row-name">{n.name}</span>
+                  <span className="row-num">{formatDeg(n.elevationDeg, 0)}</span>
+                  <span className="row-num row-dir">{compassPoint(n.azimuthDeg)}</span>
+                  <span className="row-num row-dim">{formatKm(n.rangeKm, 0)}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
 
       {below.length > 0 && (
         <details className="disclosure">
-          <summary>{below.length} nearby but below the horizon</summary>
+          <summary>{below.length} close by but under the horizon</summary>
           <ul className="list">
             {below.slice(0, 10).map((n) => (
               <li key={n.noradId}>
                 <button
-                  className={n.noradId === selectedId ? 'list-item selected' : 'list-item'}
+                  className={n.noradId === selectedId ? 'row selected' : 'row'}
                   onClick={() => engine.select(n.noradId)}
                 >
-                  <span className="list-item-title">{n.name}</span>
-                  <span className="muted small">
-                    {formatKm(n.groundDistanceKm, 0)} away · {formatDeg(n.elevationDeg, 0)}
-                  </span>
+                  <span className="row-dot" aria-hidden />
+                  <span className="row-name">{n.name}</span>
+                  <span className="row-num row-dim">{formatDeg(n.elevationDeg, 0)}</span>
+                  <span className="row-num" />
+                  <span className="row-num row-dim">{formatKm(n.groundDistanceKm, 0)}</span>
                 </button>
               </li>
             ))}
